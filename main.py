@@ -1,8 +1,14 @@
 from fastapi import FastAPI, Query, HTTPException, status
-from typing import Annotated, List
+from pydantic import BaseModel, Annotated
+from typing import List
 
-from model import Product
+# Define the Product model
+class Product(BaseModel):
+    name: str
+    category: str
+    price: float
 
+# Initialize the FastAPI app
 app = FastAPI(title="Product Search API")
 
 # Mock data
@@ -11,6 +17,7 @@ products = [
     {"name": "Product 2", "category": "Category B", "price": 23.50},
 ]
 
+# Define the search_products endpoint
 @app.get("/search", response_model=List[Product], tags=["Product"])
 async def search_products(
     name: Annotated[str | None, Query(min_length=1, max_length=50)] = None,
@@ -46,6 +53,7 @@ async def search_products(
 
     return result
 
+# Define the save_product_to_db function
 def save_product_to_db(product: Product) -> dict:
     """
     Save product to the database.
@@ -58,6 +66,7 @@ def save_product_to_db(product: Product) -> dict:
     # return product.dict()
     return product.model_dump()
 
+# Define the add_product endpoint
 @app.post("/products/", response_model=Product, status_code=status.HTTP_200_OK, tags=["Product"])
 async def add_product(product: Product):
     """
